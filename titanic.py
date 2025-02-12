@@ -21,34 +21,34 @@ X_train = train.drop('Survived', axis = 1)
 # テストデータからカラムを削除する（当然全てNaNなので要らない）
 X_test = test.drop('Survived', axis = 1)
 
-print(X_train.columns)
+def drop_train_predict(X_train, y_train, X_test, drop_columns=[]):
+    """
+    指定されたカラムを削除したデータでロジスティック回帰を学習し、予測を行う
+    Args:
+        X_train (pd.DataFrame): 学習用の特徴量データ
+        y_train (pd.Series): 学習用のラベルデータ
+        X_test (pd.DataFrame): テストデータ
+        drop_columns (list): 学習前に削除するカラムのリスト
+    Returns:
+        np.array: 予測結果
+    """
+    X_train_mod = X_train.drop(columns=drop_columns, errors='ignore')
+    X_test_mod = X_test.drop(columns=drop_columns, errors='ignore')
 
-# 訓練を行う(ロジスティック回帰)
-clf = LogisticRegression(penalty='l2', solver="sag", random_state=0, max_iter=10000)
-clf.fit(X_train, y_train)
+    clf = LogisticRegression(penalty='l2', solver="sag", random_state=0, max_iter=10000)
+    clf.fit(X_train_mod, y_train)
+    return clf.predict(X_test_mod)
 
-# 訓練データをもとに結果を予測する
-y_pred_familySize_isAlone = clf.predict(X_test)
+# 予測パターンと出力ファイル名を定義
+drop_patterns = {
+    "submission_familySize_isAlone.csv": [],
+    "submission_isAlone.csv": ["FamilySize"],
+    "submission_FamilySize.csv": ["IsAlone"],
+    "submission.csv": ["FamilySize", "IsAlone"]
+}
 
-# 結果をcsvに出力する
+# ループで学習と予測を実行
 sub = gender_submission
-sub['Survived'] = list(map(int, y_pred_familySize_isAlone))
-sub.to_csv("submission_familySize_isAlone.csv", index=False)
-
-# FamilySizeを抜いて学習し、結果をcsvに出力する
-clf.fit(X_train.drop('FamilySize', axis=1), y_train)
-y_pred_isAlone = clf.predict(X_test.drop('FamilySize', axis=1))
-sub['Survived'] = list(map(int, y_pred_isAlone))
-sub.to_csv("submission_isAlone.csv", index=False)
-
-# IsAloneを抜いて学習し、結果をcsvに出力する
-clf.fit(X_train.drop('IsAlone', axis=1), y_train)
-y_pred_isAlone = clf.predict(X_test.drop('IsAlone', axis=1))
-sub['Survived'] = list(map(int, y_pred_isAlone))
-sub.to_csv("submission_FamilySize.csv", index=False)
-
-# FamilySize, IsAloneを両方抜いて学習し、結果をcsvに出力する
-clf.fit(X_train.drop(['FamilySize', 'IsAlone'], axis=1), y_train)
-y_pred = clf.predict(X_test.drop(['FamilySize', 'IsAlone'], axis=1))
-sub['Survived'] = list(map(int, y_pred))
-sub.to_csv("submission.csv", index = False)
+for filename, drops in drop_patterns.items():
+    sub['Survived'] = drop_train_predict(X_train, y_train, X_test, drops)
+    sub.to_csv(filename, index=False)
