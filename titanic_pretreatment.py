@@ -28,3 +28,32 @@ def tutrial1(data: pd.Series) -> pd.Series:
     data = data.drop(delete_columns, axis=1)
 
     return data
+
+def tutrial3(data: pd.Series) -> pd.Series:
+    # 性別データを0/1に置き換える
+    data['Sex'] = data['Sex'].replace(['male', 'female'], [0, 1])
+
+    # 乗船港の欠損データをSにする
+    data['Embarked'] = data['Embarked'].fillna('S')
+
+    # 乗船港(C/Q/S)を数値に置き換える
+    data['Embarked'] = data['Embarked'].map({'S': 0, 'C': 1, 'Q': 2}).astype(int)
+
+    # 運賃の欠損データを平均値に置き換える
+    data['Fare'] = data['Fare'].fillna(data['Fare'].mean())
+
+    # 年齢の欠損データを非欠損データの中央値で埋める(偏差で生成する処理と比べ、再現性が確保できるのが利点)
+    data['Age'] = data['Age'].fillna(data['Age'].median())
+
+    # 家族の人数をデータに追加する
+    data['FamilySize'] = data['Parch'] + data['SibSp'] + 1
+
+    # １人の場合の生存確率が高いので、特徴として加える
+    data['IsAlone'] = 0
+    data.loc[data['FamilySize']==1, 'IsAlone'] = 1
+
+    # 名前、乗客者ID, 乗船していた兄弟/配偶者の数、乗船していた両親と子供の数、チケットID、客室番号を削除する
+    delete_columns = ['Name', 'PassengerId', 'SibSp', 'Parch', 'Ticket', 'Cabin']
+    data = data.drop(delete_columns, axis=1)
+
+    return data
