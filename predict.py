@@ -42,7 +42,12 @@ def lightgbm_predict(X_train, y_train, X_test):
     lgb_train = lgb.Dataset(X_train, y_train, categorical_feature=categorical_features)
     lgb_eval = lgb.Dataset(X_valid, y_valid, reference=lgb_train, categorical_feature=categorical_features)
 
-    params = {'objective': 'binary'}
+    params = {
+        'objective': 'binary',
+        'max_bin': 327,
+        'learning_rate': 0.01,
+        'num_leaves': 43
+    }
 
     model = lgb.train(
         params, lgb_train,
