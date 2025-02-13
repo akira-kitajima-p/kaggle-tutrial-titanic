@@ -1,6 +1,6 @@
-gender_submission.csvZone.Identifier
+*.Identifier
 submission.csv
-test.csvZone.Identifier
-train.csvZone.Identifier
 kaggle-tutrial-titanic/
-__pycache__/titanic_pretreatment.cpython-38.pyc
+__pycache__/*
+plot.py
+*submission*.csv
