@@ -3,7 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 
-def drop_train_predict(X_train, y_train, X_test, model_type="lr", drop_columns=[]):
+def drop_train_predict(X_train, y_train, X_test, model_type="lr", drop_columns=[], categorical_features=[]):
     """
     指定されたカラムを削除したデータでモデルを学習し、予測を行う
     Args:
@@ -23,21 +23,20 @@ def drop_train_predict(X_train, y_train, X_test, model_type="lr", drop_columns=[
     elif model_type == "rf":
         clf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
     elif model_type == "lgbm":
-        return lightgbm_predict(X_train_mod, y_train, X_test_mod)
+        return lightgbm_predict(X_train_mod, y_train, X_test_mod, categorical_features)
     else:
         raise ValueError("model_type must be 'lr', 'rf', or 'lgbm'.")
 
     clf.fit(X_train_mod, y_train)
     return clf.predict(X_test_mod).astype(int)
 
-def lightgbm_predict(X_train, y_train, X_test):
+def lightgbm_predict(X_train, y_train, X_test, categorical_features):
     """
     LightGBMによる学習と予測
     """
     X_train, X_valid, y_train, y_valid = train_test_split(
         X_train, y_train, test_size=0.3, random_state=0, stratify=y_train
     )
-    categorical_features = ['Embarked', 'Pclass', 'Sex']
 
     lgb_train = lgb.Dataset(X_train, y_train, categorical_feature=categorical_features)
     lgb_eval = lgb.Dataset(X_valid, y_valid, reference=lgb_train, categorical_feature=categorical_features)

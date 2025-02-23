@@ -39,7 +39,7 @@ model_types = ["lr", "rf", "lgbm"]
 sub = gender_submission
 for filename, drops in drop_patterns.items():
     for model_type in model_types:
-        sub['Survived'] = drop_train_predict(X_train, y_train, X_test, model_type, drops)
+        sub['Survived'] = drop_train_predict(X_train, y_train, X_test, model_type, drops, ['Embarked', 'Pclass', 'Sex'])
         label = filename.replace("submission", f"{model_type}_submission")
         accuracy = accuracy_score(valid['Survived'], sub['Survived'])
         print(label + " " + str(accuracy))
